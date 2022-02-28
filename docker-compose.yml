@@ -15,7 +15,7 @@ services:
       - "1026:1026" # localhost:1026
     command: -dbhost mongo-db -logLevel DEBUG -noCache -corsOrigin __ALL -insecureNotif
     healthcheck:
-      test: curl --fail -s http://orion:${ORION_PORT}/version || exit 1
+      test: curl --fail -s http://172.18.1.20:1026/version || exit 1
       interval: 5s
 
   # Databases
@@ -40,15 +40,18 @@ services:
 
   # ros
   ros:
-    image: ros-is:latest
+    image: ros-fiware:latest
     hostname: ros
     container_name: ros
     depends_on:
       - orion
-    networks:
-      - default
     volumes:
       - ./config/config.yaml:/root/is-workspace/config/config.yaml
+    network_mode: host
+    environment:
+      - ROS_MASTER_URI=http://ismael-GTC:11311/
+    command: ["/bin/bash", "-c", "source /opt/ros/melodic/setup.bash && source /root/is-workspace/install/setup.bash && /root/is-workspace/install/is-core/install/integration-service /root/is-workspace/config/config.yaml"]
+
 
 networks:
   default:

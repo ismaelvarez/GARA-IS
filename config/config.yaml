@@ -4,12 +4,21 @@ types:
             struct HelloWorld {
                 string data;
             };
+
+            struct TurtlePosition {
+                float x;
+                float y;
+                float theta;
+                float linear_velocity;
+                float angular_velocity;
+            };
 systems:
     ros1: { type: ros1 }
-    fiware: { type: fiware, host: "172.18.1.20", port: 1026, types-from: ros1 }
+    fiware: { type: fiware, host: "127.0.0.1", port: 1026, types-from: ros1 }
 
 routes:
     ros1_to_fiware: { from: ros1, to: fiware }
 
 topics:
-    hello_world: { type: "std_msgs/String", route: ros1_to_fiware, remap: {fiware: {type: HelloWorld}} }
+    hello_fiware: { type: "std_msgs/String", route: ros1_to_fiware, remap: {fiware: {type: HelloWorld}} }
+    turtle1_pose: { type: "turtlesim/Pose", route: ros1_to_fiware, remap: {fiware: {type: TurtlePosition}, ros1: { topic: "turtle1/pose" } } }

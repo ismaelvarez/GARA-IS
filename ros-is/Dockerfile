@@ -11,6 +11,8 @@ RUN apt install -y python-rosdep python-rosinstall python-rosinstall-generator p
 RUN apt-get update && apt-get install -y cmake git python3-flake8 python3-pip python3-pytest-cov  python3-setuptools \
   wget && rm -rf /var/lib/apt/lists/*
 
+RUN ["/bin/bash", "-c", "source /opt/ros/melodic/setup.bash && apt-get update && apt install -y ros-melodic-turtlesim"]
+
 RUN apt update && apt install -y python3-colcon-common-extensions
 
 RUN apt update && apt install -y libyaml-cpp-dev libboost-program-options-dev
@@ -32,14 +34,8 @@ RUN python3 -m pip install -U \
 
 RUN mkdir /root/is-workspace/config
 
-RUN ["/bin/bash", "-c", "cd /root/is-workspace && source /opt/ros/melodic/setup.bash && colcon build --cmake-args -DBIN_INSTALL_DIR=./install -Dcatkin_DIR=/opt/ros/melodic/share/catkin/cmake/"]
+RUN ["/bin/bash", "-c", "cd /root/is-workspace && source /opt/ros/melodic/setup.bash && colcon build --cmake-args -DBIN_INSTALL_DIR=./install -Dcatkin_DIR=/opt/ros/melodic/share/catkin/cmake/  -DMIX_ROS_PACKAGES='turtlesim'"]
 
 COPY config/config.yaml /root/is-workspace/config/config.yaml
-
-COPY entrypoint.sh /entrypoint.sh
-
-RUN chown root:root /entrypoint.sh && chmod 777 /entrypoint.sh
-
-CMD ["/bin/bash", "-c", "./entrypoint.sh"]
 
 
