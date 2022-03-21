@@ -12,13 +12,19 @@ types:
                 float linear_velocity;
                 float angular_velocity;
             };
+            
+            struct ThermalInfo {
+                float temperatureMax;
+                float temperatureMin;
+                sequence<double> positionMax;
+                sequence<double> positionMin;
+            };
 systems:
     ros1: { type: ros1 }
-    fiware: { type: fiware, host: "127.0.0.1", port: 1026, types-from: ros1 }
+    fiware: { type: fiware, host: "161.72.18.76", port: 1026, types-from: ros1 }
 
 routes:
     ros1_to_fiware: { from: ros1, to: fiware }
 
 topics:
-    hello_fiware: { type: "std_msgs/String", route: ros1_to_fiware, remap: {fiware: {type: HelloWorld}} }
-    turtle1_pose: { type: "turtlesim/Pose", route: ros1_to_fiware, remap: {fiware: {type: TurtlePosition}, ros1: { topic: "turtle1/pose" } } }
+    GARA.IRCamera.thermal.info: { type: "gara_messages/IRCameraTemperatureInfo", route: ros1_to_fiware, remap: {fiware: {type: ThermalInfo}, ros1: { topic: "thermal/temperature_info" } } }

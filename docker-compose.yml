@@ -1,65 +1,24 @@
 version: "3.5"
 services:
 
-  # Orion is the context broker
-  orion:
-    image: fiware/orion:3.1.0
-    hostname: orion
-    container_name: orion
-    depends_on:
-      - mongo-db
-    networks:
-      default:
-        ipv4_address: 172.18.1.20
-    ports:
-      - "1026:1026" # localhost:1026
-    command: -dbhost mongo-db -logLevel DEBUG -noCache -corsOrigin __ALL -insecureNotif
-    healthcheck:
-      test: curl --fail -s http://172.18.1.20:1026/version || exit 1
-      interval: 5s
-
-  # Databases
-  mongo-db:
-    image: mongo:4.4
-    hostname: mongo-db
-    container_name: db-mongo
-    expose:
-      - "27017"
-    ports:
-      - "27017:27017" # localhost:27017 # localhost:27017
-    networks:
-      - default
-    volumes:
-      - mongo-db:/data
-      - "/home/ialvarez/mongodb:/data/db"
-    healthcheck:
-      test: |
-        host=`hostname --ip-address || echo '127.0.0.1'`; 
-        mongo --quiet $host/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)' && echo 0 || echo 1
-      interval: 5s
 
   # ros
-  ros:
-    image: ros-fiware:latest
-    hostname: ros
-    container_name: ros
-    depends_on:
-      - orion
+  ros-is:
+    image: ros-is:latest
+    hostname: ros-is
+    container_name: ros-is
     volumes:
       - ./config/config.yaml:/root/is-workspace/config/config.yaml
+    
     network_mode: host
     environment:
-      - ROS_MASTER_URI=http://ismael-GTC:11311/
-    command: ["/bin/bash", "-c", "source /opt/ros/melodic/setup.bash && source /root/is-workspace/install/setup.bash && /root/is-workspace/install/is-core/install/integration-service /root/is-workspace/config/config.yaml"]
-
+      - ROS_MASTER_URI=http://172.18.1.1:11311/
+      - ROS_IP=172.18.1.20
+    command: ["/bin/bash", "-c", "source /opt/ros/melodic/setup.bash && source /root/catkin_ws/devel/setup.bash && source /root/is-workspace/install/setup.bash && /root/is-workspace/install/is-core/install/integration-service /root/is-workspace/config/config.yaml"]
 
 networks:
   default:
     ipam:
       config:
         - subnet: 172.18.1.0/24
-
-volumes:
-  mongo-db: ~
-
 
